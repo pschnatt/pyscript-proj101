@@ -1,4 +1,5 @@
 import persistent
+from pydantic import BaseModel
 from abc import ABC, abstractmethod
 
 
@@ -25,6 +26,7 @@ class User(Account, persistent.Persistent):
         self.weight = weight
         self.workouts = persistent.list.PersistentList(workouts)
         self.meals = persistent.list.PersistentList(meals)
+
 
     def log_workout(self, workout):
         self.workouts.append(workout)

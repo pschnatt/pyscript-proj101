@@ -48,6 +48,44 @@ def init_db():
         root.exerciselist = BTrees.OOBTree.BTree()
         root.meallist = BTrees.OOBTree.BTree()
 
+# user CRUD
+
+def create_user(username, password, height, weight, workouts=None, meals=None):
+    if not workouts:
+        workouts = []
+    if not meals:
+        meals = []
+    if username in connection.root.users:
+        raise ValueError("Username already exists. Please choose a different username.")
+    
+    user = User(username, password, height=height, weight=weight, workouts=workouts, meals=meals)
+    connection.root.users[username] = user
+    transaction.commit()
+
+def update_user(username, new_data):
+    user = connection.root.users.get(username)
+    if user:
+        for key, value in new_data.items():
+            if value is not None:
+                setattr(user, key, value)
+        transaction.commit()
+    else:
+        print(f"User '{username}' not found.")
+
+def delete_user(username):
+    user = connection.root.users.pop(username, None)
+    if user:
+        transaction.commit()
+        print(f"User '{username}' deleted.")
+    else:
+        print(f"User '{username}' not found.")
+
+def fetch_users(username=None):
+    users = connection.root.users.values()
+    if username:
+        user = connection.root.users.get(username)
+        return [user] if user else []
+    return list(users)
 
 def close_db_connection():
     global connection, db
@@ -55,6 +93,5 @@ def close_db_connection():
     connection.close()
     db.close()
     print("Database closed.")
-
 
 atexit.register(close_db_connection)
